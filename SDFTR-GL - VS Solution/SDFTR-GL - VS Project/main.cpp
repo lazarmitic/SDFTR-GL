@@ -7,7 +7,7 @@
 
 int main(int argc, char * argv[])
 {
-	std::cout << "Stage: GLEW initialized." << std::endl;
+	std::cout << "Stage: OpenGL States set." << std::endl;
 
 	/// GLFW Window initialization 
 	int windowWidth = 800; 
@@ -30,9 +30,16 @@ int main(int argc, char * argv[])
 	glewInit();
 	///
 
+	/// OpenGL States
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glViewport(0, 0, windowWidth, windowHeight);
+	///
+
 	/// Render loop
 	while (!glfwWindowShouldClose(windowHandle))
 	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//Render code goes here
 
 		glfwSwapBuffers(windowHandle);
