@@ -1,12 +1,15 @@
+#define GLEW_STATIC // If we want to link GLEW lib staticly we need to define this
+
 #include <iostream>
 
+#include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
 
 int main(int argc, char * argv[])
 {
-	std::cout << "Stage: GLFW window initialized." << std::endl;
+	std::cout << "Stage: GLEW initialized." << std::endl;
 
-	/// GLEW Window initialization 
+	/// GLFW Window initialization 
 	int windowWidth = 800; 
 	int windowHeight = 600;
 	char * windowName = "Signed Distance Field Text Rendering";
@@ -22,6 +25,11 @@ int main(int argc, char * argv[])
 	glfwMakeContextCurrent(windowHandle);
 	///
 	
+	/// GLEW Initialization
+	glewExperimental = GL_TRUE;
+	glewInit();
+	///
+
 	/// Render loop
 	while (!glfwWindowShouldClose(windowHandle))
 	{
