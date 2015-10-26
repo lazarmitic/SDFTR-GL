@@ -2,8 +2,8 @@
 
 Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 {
-	vShaderCode = ReadShaderFromFile(vertexPath).c_str();
-	fShaderCode = ReadShaderFromFile(fragmentPath).c_str();
+	vShaderCode = ReadShaderFromFile(vertexPath);
+	fShaderCode = ReadShaderFromFile(fragmentPath);
 
 	vertex = CreateShader(GL_VERTEX_SHADER);
 	fragment = CreateShader(GL_FRAGMENT_SHADER);
@@ -19,16 +19,18 @@ Shader::~Shader()
 
 void Shader::Use()
 {
-	glUseProgram(this->shaderProgram);
+	glUseProgram(shaderProgram);
 }
 
 std::string Shader::ReadShaderFromFile(const GLchar * shaderFilePath)
 {
 	std::string shaderCode;
+	std::ifstream shaderFile;
 
+	shaderFile.exceptions(std::ifstream::badbit);
 	try
 	{
-		std::ifstream shaderFile(shaderFilePath);
+		shaderFile.open(shaderFilePath);
 		std::stringstream shaderStream;
 
 		shaderStream << shaderFile.rdbuf();
@@ -36,7 +38,6 @@ std::string Shader::ReadShaderFromFile(const GLchar * shaderFilePath)
 		shaderFile.close();
 		
 		shaderCode = shaderStream.str();
-		
 	}
 	catch (std::exception e)
 	{
@@ -48,8 +49,12 @@ std::string Shader::ReadShaderFromFile(const GLchar * shaderFilePath)
 
 GLuint Shader::CreateShader(GLenum shaderType)
 {
+	const GLchar *code;
+	if(shaderType == GL_VERTEX_SHADER) code = vShaderCode.c_str();
+	if(shaderType == GL_FRAGMENT_SHADER) code = fShaderCode.c_str();
+
 	GLuint shader = glCreateShader(shaderType);
-	glShaderSource(shader, 1, &vShaderCode, NULL);
+	glShaderSource(shader, 1, &code, NULL);
 	glCompileShader(shader);
 
 	GLint success;

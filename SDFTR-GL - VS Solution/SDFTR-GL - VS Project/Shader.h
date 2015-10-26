@@ -16,8 +16,8 @@ public:
 	void Use();
 	
 private:
-	const GLchar *vShaderCode;
-	const GLchar *fShaderCode;
+	std::string vShaderCode;
+	std::string fShaderCode;
 
 	GLuint vertex;
 	GLuint fragment;
