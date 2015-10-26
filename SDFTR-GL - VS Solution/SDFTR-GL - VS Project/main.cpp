@@ -7,7 +7,7 @@
 
 int main(int argc, char * argv[])
 {
-	std::cout << "Stage: OpenGL States set." << std::endl;
+	std::cout << "Stage: Shader class implemented." << std::endl;
 
 	/// GLFW Window initialization 
 	int windowWidth = 800; 
