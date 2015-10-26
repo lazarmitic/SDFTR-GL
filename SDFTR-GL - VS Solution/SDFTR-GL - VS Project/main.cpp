@@ -5,9 +5,11 @@
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "Shader.h"
+
 int main(int argc, char * argv[])
 {
-	std::cout << "Stage: Shader class implemented." << std::endl;
+	std::cout << "Stage: Rendering simple quad." << std::endl;
 
 	/// GLFW Window initialization 
 	int windowWidth = 800; 
@@ -36,11 +38,50 @@ int main(int argc, char * argv[])
 	glViewport(0, 0, windowWidth, windowHeight);
 	///
 
+	/// Quad set-up
+	GLfloat vertices[] = {
+		-0.5f, -0.5f,  0.0f,
+		 0.5f, -0.5f,  0.0f,
+		-0.5f,  0.5f,  0.0f,
+		-0.5f,  0.5f,  0.0f,
+		 0.5f, -0.5f,  0.0f,
+		 0.5f,  0.5f,  0.0f
+	};
+
+	GLuint VBO, VAO;
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
+	glBindVertexArray(0); // Unbind VAO
+	///
+
+	/// Shader set-up
+	Shader shader("vertexShader.vs", "fragmentShader.fs");
+
+	shader.Use();
+	///
+
 	/// Render loop
 	while (!glfwWindowShouldClose(windowHandle))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//Render code goes here
+
+		/// Draw quad
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+		///
 
 		glfwSwapBuffers(windowHandle);
 		glfwPollEvents();
