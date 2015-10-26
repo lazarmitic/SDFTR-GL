@@ -1,2 +1,3 @@
-# SDFTR-GL
-Signed Distance Field Rendering implemented in modern OpenGL
+# SDFTR-GL (WIP)   
+
+Signed Distance Field Text Rendering implemented in modern OpenGL   
