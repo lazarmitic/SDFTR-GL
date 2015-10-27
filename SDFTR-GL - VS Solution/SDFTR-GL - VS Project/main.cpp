@@ -4,12 +4,13 @@
 
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
+#include <SOIL/SOIL.h>
 
 #include "Shader.h"
 
 int main(int argc, char * argv[])
 {
-	std::cout << "Stage: Rendering simple quad." << std::endl;
+	std::cout << "Stage: Rendering font map." << std::endl;
 
 	/// GLFW Window initialization 
 	int windowWidth = 800; 
@@ -34,18 +35,27 @@ int main(int argc, char * argv[])
 
 	/// OpenGL States
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glViewport(0, 0, windowWidth, windowHeight);
 	///
 
+	/// Shader set-up
+	Shader shader("vertexShader.vs", "fragmentShader.fs");
+
+	shader.Use();
+	///
+
 	/// Quad set-up
 	GLfloat vertices[] = {
-		-0.5f, -0.5f,  0.0f,
-		 0.5f, -0.5f,  0.0f,
-		-0.5f,  0.5f,  0.0f,
-		-0.5f,  0.5f,  0.0f,
-		 0.5f, -0.5f,  0.0f,
-		 0.5f,  0.5f,  0.0f
+		//Position x-y-z       //Texture coordinates x-y
+		-0.5f, -0.5f,  0.0f,   0.0f, 0.0f,
+		 0.5f, -0.5f,  0.0f,   1.0f, 0.0f,
+		-0.5f,  0.5f,  0.0f,   0.0f, 1.0f,
+		-0.5f,  0.5f,  0.0f,   0.0f, 1.0f,
+		 0.5f, -0.5f,  0.0f,   1.0f, 0.0f,
+		 0.5f,  0.5f,  0.0f,   1.0f, 1.0f
 	};
 
 	GLuint VBO, VAO;
@@ -58,17 +68,33 @@ int main(int argc, char * argv[])
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind VBO
 	glBindVertexArray(0); // Unbind VAO
 	///
 
-	/// Shader set-up
-	Shader shader("vertexShader.vs", "fragmentShader.fs");
+	/// Font map set-up
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
-	shader.Use();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height;
+	unsigned char* image = SOIL_load_image("font.png", &width, &height, 0, SOIL_LOAD_RGBA);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	///
 
 	/// Render loop
@@ -78,6 +104,7 @@ int main(int argc, char * argv[])
 		//Render code goes here
 
 		/// Draw quad
+		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
