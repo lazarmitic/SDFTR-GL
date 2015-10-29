@@ -5,8 +5,22 @@
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
 #include <SOIL/SOIL.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Shader.h"
+
+/// Keyboard event function
+bool keys[256];
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+	if (action == GLFW_PRESS)
+		keys[key] = true;
+	if (action == GLFW_RELEASE)
+		keys[key] = false;
+}
+///
 
 int main(int argc, char * argv[])
 {
@@ -26,6 +40,8 @@ int main(int argc, char * argv[])
 
 	windowHandle = glfwCreateWindow(windowWidth, windowHeight, windowName, nullptr, nullptr);
 	glfwMakeContextCurrent(windowHandle);
+
+	glfwSetKeyCallback(windowHandle, key_callback);
 	///
 	
 	/// GLEW Initialization
@@ -78,7 +94,7 @@ int main(int argc, char * argv[])
 	glBindVertexArray(0); // Unbind VAO
 	///
 
-	/// Font map set-up
+	/// Font map texture set-up
 	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -90,11 +106,22 @@ int main(int argc, char * argv[])
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int width, height;
-	unsigned char* image = SOIL_load_image("font.png", &width, &height, 0, SOIL_LOAD_RGBA);
+	unsigned char* image = SOIL_load_image("highres.png", &width, &height, 0, SOIL_LOAD_RGBA);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	///
+
+	/// Text Map transformation variables
+	float scale = 1.0;
+	float angle = 0.0;
+	glm::mat4 trans;
+	///
+
+	/// Get uniform locations
+	GLuint transformLoc = glGetUniformLocation(shader.getProgram(), "transform");
+	GLint loc = glGetUniformLocation(shader.getProgram(), "scale");
 	///
 
 	/// Render loop
@@ -102,6 +129,20 @@ int main(int argc, char * argv[])
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//Render code goes here
+
+		/// Transform Text Map
+		if (keys[GLFW_KEY_W]) scale += 0.0006;
+		if (keys[GLFW_KEY_S]) scale -= 0.0006;
+
+		if (keys[GLFW_KEY_A]) angle += 0.006;
+		if (keys[GLFW_KEY_D]) angle -= 0.006;
+
+		trans = glm::mat4(1);
+		trans = glm::scale(trans, glm::vec3(scale, scale, 1));
+		trans = glm::rotate(trans, glm::radians(angle), glm::vec3(0.0, 0.0, 1.0));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glUniform1f(loc, scale);
+		///
 
 		/// Draw quad
 		glBindTexture(GL_TEXTURE_2D, texture);

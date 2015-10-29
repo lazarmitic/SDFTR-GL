@@ -14,7 +14,12 @@ public:
 	~Shader();
 
 	void Use();
-	
+	GLuint getProgram()
+	{
+		return shaderProgram;
+	}
+
+
 private:
 	std::string vShaderCode;
 	std::string fShaderCode;
